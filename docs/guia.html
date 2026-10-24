@@ -508,7 +508,7 @@
     <hr class="div">
 
     <h2 id="antes">Antes de la clase</h2>
-    <p class="section-note">Hay descargas grandes (sobre todo la de Cypress). Instalen <strong>la víspera</strong>, con buena conexión: en clase la tienda corre en su equipo y ya no hace falta internet.</p>
+    <p class="section-note">Hay descargas grandes (sobre todo la de Cypress). Instalen <strong>la víspera</strong>, con buena conexión. En clase la tienda corre en su equipo, así que las pruebas y las mediciones no dependen de la red (solo el <code>git push</code>, el tablero y la consulta de versiones a npm la usan).</p>
     <ul class="check">
       <li><span><strong>Node.js 22 o superior.</strong> Comprueben con <code>node -v</code>. Cypress 16 y Selenium 4.51 no admiten versiones anteriores: con Node 20 <code>npm install</code> avisa («Unsupported engine»). Si no lo tienen o es más viejo, instalen la versión LTS desde nodejs.org.</span></li>
       <li><span><strong>Google Chrome.</strong> Lo usan las tres herramientas (así todas miden contra el mismo navegador). Si no lo tienen, instálenlo desde google.com/chrome.</span></li>
@@ -522,7 +522,7 @@
         <thead><tr><th>Kit</th><th>Qué descarga</th><th>Comprobación</th></tr></thead>
         <tbody>
           <tr><td><code>kits/selenium</code></td><td>≈ 40 MB de paquetes. La <strong>primera vez</strong> que corre, Selenium Manager baja el <em>chromedriver</em> que corresponde a su Chrome.</td><td><code>npm install</code> y <code>npm test</code></td></tr>
-          <tr><td><code>kits/cypress</code></td><td>≈ 30 MB de paquetes <strong>y el binario de Cypress</strong> (unos 600 MB ya instalado): puede tardar varios minutos.</td><td><code>npm install</code> y <code>npm test</code></td></tr>
+          <tr><td><code>kits/cypress</code></td><td>≈ 30 MB de paquetes <strong>y el binario de Cypress</strong> (unos 600 MB ya instalado): con buena conexión tarda menos de un minuto (en nuestra prueba, 39 s); con una lenta, varios. La primera vez que corre <code>npm test</code>, Cypress verifica su binario y tarda más (18 s en nuestra prueba).</td><td><code>npm install</code> y <code>npm test</code></td></tr>
           <tr><td><code>kits/playwright-cucumber</code></td><td>≈ 50 MB. No descarga navegadores: usa su Chrome.</td><td><code>npm install</code> y <code>npm test</code></td></tr>
           <tr><td><code>control/playwright</code></td><td>≈ 20 MB.</td><td><code>npm install</code> y <code>npm test</code> (pasan 3 pruebas)</td></tr>
         </tbody>
@@ -547,7 +547,7 @@
         </tbody>
       </table>
     </div>
-    <p class="section-note" style="margin-top:12px"><strong>Ruta corta (≈ 100 min):</strong> partes 0 a 4 y una matriz hecha en grupo con el docente. Las partes 5 y 6 en equipo quedan como trabajo posterior.</p>
+    <p class="section-note" style="margin-top:12px"><strong>Ruta corta (≈ 95 min):</strong> partes 0 a 4. La matriz y el ADR (partes 5 y 6) se hacen después, en grupo con el docente o como trabajo posterior.</p>
 
     <hr class="div">
 
@@ -760,7 +760,7 @@ git pull && git push</code></pre>
       <h4>Situación</h4><ul><li>Doce proyectos web de 2 a 4 meses (a veces WordPress, a veces React). Cada trimestre llegan practicantes nuevos.</li><li>Antes de entregar a cada cliente se necesita un conjunto mínimo de pruebas de humo: inicio de sesión, compra y formulario de contacto.</li><li>No existe un equipo de QA: cada proyecto arma lo suyo y cada uno lo hace distinto.</li></ul>
       <h4>Lo que le duele</h4><p>Cada proyecto reinventa su automatización y, cuando el practicante se va, nadie sabe cómo correr las pruebas.</p>
       <h4>Restricciones</h4><ul><li>Presupuesto bajo y poco tiempo para configurar.</li><li>Nadie quiere convertirse en «el experto» de una herramienta.</li></ul>
-      <h4>Preguntas para pesar los criterios</h4><ol><li>¿Qué herramienta tiene la menor curva para un practicante? ¿Cómo lo midieron en el duelo?</li><li>¿Cuánto cuesta arrancar un proyecto nuevo (instalación, configuración, primera prueba verde)?</li><li>Hay proyectos sin JavaScript: ¿qué le pasa a cada opción?</li></ol>
+      <h4>Preguntas para pesar los criterios</h4><ol><li>¿Qué herramienta tiene la menor curva para un practicante? ¿Cómo lo midieron en el duelo?</li><li>¿Cuánto cuesta arrancar un proyecto nuevo (instalación, configuración, primera prueba verde)?</li><li>Quienes desarrollan los proyectos de WordPress escriben PHP, no JavaScript: ¿en qué lenguajes se pueden escribir las pruebas con cada opción? Verifíquenlo en la documentación.</li></ol>
     </details>
     <details class="escenario" id="e5">
       <summary><span class="id">E5</span><strong>Escuela de Testers</strong> — Equipo de QA manual que empieza a automatizar</summary>

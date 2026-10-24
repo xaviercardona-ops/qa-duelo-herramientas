@@ -7,7 +7,7 @@ Tres herramientas, **una misma regla**: cada equipo prueba **una** (Selenium + M
 
 - **Duración:** ≈ 2 h 20 min (7 partes) · equipos de 3 (mínimo 2), un repositorio por equipo
 - **Qué necesitan:** [Node.js](https://nodejs.org) **22 o superior** (lo exigen Cypress 16 y Selenium 4.51), Git, **Google Chrome** y un editor (VS Code recomendado)
-- **Internet:** solo para instalar. La tienda corre en su equipo (copia fija), así que las pruebas y las mediciones no dependen de la red
+- **Internet:** para instalar, para `git push` y para el tablero. La tienda corre en su equipo (copia fija), así que las pruebas y las mediciones no dependen de la red
 
 ## Empieza aquí
 
@@ -28,7 +28,7 @@ npm run medir               # Parte 4: mide la suite (5 corridas; mejor: npm run
 | Kit | Qué descarga | Comprobación |
 |---|---|---|
 | `kits/selenium` | ≈ 40 MB de paquetes. La **primera vez** que corre, Selenium Manager baja el *chromedriver* que corresponde a su Chrome | `npm install && npm test` |
-| `kits/cypress` | ≈ 30 MB de paquetes **y** el binario de Cypress (unos 600 MB ya instalado; puede tardar varios minutos) | `npm install && npm test` |
+| `kits/cypress` | ≈ 30 MB de paquetes **y** el binario de Cypress (unos 600 MB ya instalado: con buena conexión tarda menos de un minuto —en nuestra prueba, 39 s—; con una lenta, varios). La primera vez que corre `npm test`, Cypress verifica su binario y tarda más (18 s en nuestra prueba) | `npm install && npm test` |
 | `kits/playwright-cucumber` | ≈ 50 MB de paquetes. No descarga navegadores: usa su Chrome | `npm install && npm test` |
 | `control/playwright` | ≈ 20 MB. **Todos los equipos lo necesitan** para la Parte 4 (es la vara con que se mide) | `npm install && npm test` (deben pasar 3 pruebas) |
 
@@ -48,7 +48,7 @@ herramientas/
   con-tienda.mjs         Enciende la tienda local, corre el comando y la apaga (lo usa cada `npm test`)
   servir-tienda.mjs      El servidor estático de la tienda (sin dependencias)
 tienda/                  La Tienda Escolar: copia fija exportada del sitio de las clases. No se edita
-docs/                    El sitio del duelo: guía, tablero de la clase y calculadora de la matriz
+docs/                    El sitio del duelo: guía, presentación del tema, tablero de la clase y calculadora de la matriz
 ENTREGA.md               Lo que entregan: bitácora, mediciones, reflexión
 MATRIZ.md                La matriz de decisión ponderada (Parte 5)
 ADR.md                   El registro de la decisión (Parte 6)

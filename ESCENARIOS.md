@@ -101,7 +101,7 @@ sus gustos.
 
 1. ¿Qué herramienta tiene la menor curva para un practicante? ¿Cómo lo midieron en el duelo?
 2. ¿Cuánto cuesta arrancar un proyecto nuevo (instalación, configuración, primera prueba verde)?
-3. Hay proyectos sin JavaScript: ¿qué le pasa a cada opción?
+3. Quienes desarrollan los proyectos de WordPress escriben PHP, no JavaScript: ¿en qué lenguajes se pueden escribir las pruebas con cada opción? Verifíquenlo en la documentación.
 
 ## E5 · Escuela de Testers — Equipo de QA manual que empieza a automatizar
 
