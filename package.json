@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "Duelo de herramientas (Verificación y validación, tema 3.2): tres kits de automatización, un control, un medidor y la Tienda Escolar en copia local",
-  "engines": { "node": ">=20" },
+  "engines": { "node": ">=22" },
   "scripts": {
     "tienda": "node herramientas/servir-tienda.mjs"
   }

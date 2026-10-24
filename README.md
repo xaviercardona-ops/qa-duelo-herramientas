@@ -6,7 +6,7 @@ Tres herramientas, **una misma regla**: cada equipo prueba **una** (Selenium + M
 **toda** la clase, **recomienda una herramienta** a un cliente concreto, por escrito (un ADR).
 
 - **Duración:** ≈ 2 h 20 min (7 partes) · equipos de 3 (mínimo 2), un repositorio por equipo
-- **Qué necesitan:** [Node.js](https://nodejs.org) 20 o superior, Git, **Google Chrome** y un editor (VS Code recomendado)
+- **Qué necesitan:** [Node.js](https://nodejs.org) **22 o superior** (lo exigen Cypress 16 y Selenium 4.51), Git, **Google Chrome** y un editor (VS Code recomendado)
 - **Internet:** solo para instalar. La tienda corre en su equipo (copia fija), así que las pruebas y las mediciones no dependen de la red
 
 ## Empieza aquí

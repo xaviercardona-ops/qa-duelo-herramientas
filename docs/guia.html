@@ -510,7 +510,7 @@
     <h2 id="antes">Antes de la clase</h2>
     <p class="section-note">Hay descargas grandes (sobre todo la de Cypress). Instalen <strong>la víspera</strong>, con buena conexión: en clase la tienda corre en su equipo y ya no hace falta internet.</p>
     <ul class="check">
-      <li><span><strong>Node.js 20 o superior.</strong> Comprueben con <code>node -v</code>. Si no lo tienen, instalen la versión LTS desde nodejs.org.</span></li>
+      <li><span><strong>Node.js 22 o superior.</strong> Comprueben con <code>node -v</code>. Cypress 16 y Selenium 4.51 no admiten versiones anteriores: con Node 20 <code>npm install</code> avisa («Unsupported engine»). Si no lo tienen o es más viejo, instalen la versión LTS desde nodejs.org.</span></li>
       <li><span><strong>Google Chrome.</strong> Lo usan las tres herramientas (así todas miden contra el mismo navegador). Si no lo tienen, instálenlo desde google.com/chrome.</span></li>
       <li><span><strong>Git y una cuenta de GitHub por integrante.</strong> Una persona crea el repositorio del equipo y agrega a las demás como colaboradoras. <strong>El repositorio debe ser público</strong> para que el tablero lo lea (o el docente recoge los archivos a mano).</span></li>
       <li><span><strong>Instalar el kit de su herramienta</strong> en cuanto sepan cuál es (ver la tabla de abajo) y comprobar que <code>npm test</code> corre.</span></li>
@@ -828,6 +828,7 @@ git pull && git push</code></pre>
         <thead><tr><th>Síntoma</th><th>Causa probable</th><th>Qué hacer</th></tr></thead>
         <tbody>
           <tr><td><code>npm install</code> se queda mucho tiempo en Cypress</td><td>Está bajando el binario de Cypress (grande).</td><td>Esperen; si falla por la red, <code>npx cypress install</code> reintenta solo la descarga.</td></tr>
+          <tr><td><code>npm install</code> avisa «Unsupported engine» o Cucumber dice que solo corre en Node 22 o superior</td><td>Tienen una versión de Node anterior a la 22.</td><td>Instalen Node 22 (o 24) LTS desde nodejs.org y repitan <code>npm install</code> dentro del kit.</td></tr>
           <tr><td>Playwright dice que no encuentra «chrome»</td><td>No tienen Google Chrome instalado (los kits usan el Chrome del sistema).</td><td>Instalen Chrome desde google.com/chrome y repitan.</td></tr>
           <tr><td>Selenium se queja del <em>chromedriver</em> o de la versión de Chrome</td><td>El driver que descargó Selenium Manager no corresponde a su Chrome, o no pudo descargarlo.</td><td>Actualicen Chrome, comprueben su conexión y repitan <code>npm test</code>; el mensaje dice cuál de las dos cosas pasó.</td></tr>
           <tr><td><code>npm test</code> no encuentra <code>mocha</code>, <code>cypress</code> o <code>cucumber-js</code></td><td>No corrieron <code>npm install</code> <em>dentro</em> de la carpeta del kit.</td><td><code>cd kits/&lt;su-kit&gt; &amp;&amp; npm install</code>.</td></tr>

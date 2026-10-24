@@ -4,7 +4,7 @@
   "private": true,
   "description": "Control del duelo: los tres criterios ya escritos en Playwright, para medir con la misma regla",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "test": "node ../../herramientas/con-tienda.mjs playwright test",

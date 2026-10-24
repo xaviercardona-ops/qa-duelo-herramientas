@@ -4,7 +4,7 @@
   "private": true,
   "description": "Kit del duelo: Playwright + Cucumber (BDD con Gherkin en español)",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "test": "node ../../herramientas/con-tienda.mjs cucumber-js",

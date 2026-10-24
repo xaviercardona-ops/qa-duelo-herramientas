@@ -15,7 +15,7 @@
  *   4. Une lo que ustedes anotaron a mano en autoinforme.json (minutos y diagnóstico)
  *   5. Escribe el resultado en medidas.json (en la raíz del repositorio): ahí lo lee el tablero de la clase.
  *
- * No necesita instalar nada: solo Node 20 o superior.
+ * No necesita instalar nada: solo Node 22 o superior (el mismo que piden los kits).
  */
 import { spawn } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
