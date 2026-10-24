@@ -1,0 +1,19 @@
+{
+  "equipo": "",
+  "integrantes": [],
+  "escenario": "",
+  "usoDeIA": "",
+  "minutos": {
+    "instalacion": null,
+    "ca2": null,
+    "ca3": null
+  },
+  "diagnostico": {
+    "diceQueFallo": null,
+    "esperadoYRecibido": null,
+    "lineaDeLaPrueba": null,
+    "capturaOVideo": null,
+    "trazaOInforme": null
+  },
+  "notas": ""
+}

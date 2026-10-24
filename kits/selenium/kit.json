@@ -1,0 +1,10 @@
+{
+  "herramienta": "selenium",
+  "nombre": "Selenium + Mocha",
+  "pruebasEsperadas": 3,
+  "resultado": "(\\d+) passing",
+  "pruebas": ["pruebas/**/*.js"],
+  "soporte": ["soporte/**/*.js", ".mocharc.json"],
+  "paquetes": ["selenium-webdriver", "mocha"],
+  "salida": "medidas.json"
+}

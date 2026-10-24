@@ -1,0 +1,17 @@
+{
+  "name": "duelo-kit-selenium",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Kit del duelo: Selenium WebDriver + Mocha",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node ../../herramientas/con-tienda.mjs mocha",
+    "medir": "node ../../herramientas/medir.mjs"
+  },
+  "devDependencies": {
+    "mocha": "^12.0.0",
+    "selenium-webdriver": "^4.30.0"
+  }
+}

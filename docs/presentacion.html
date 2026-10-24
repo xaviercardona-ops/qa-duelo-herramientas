@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Frameworks y librerías de automatización — Presentación</title>
+<meta name="description" content="Presentación del tema 3.2 de Verificación y validación: librería y framework, la anatomía de una solución de automatización, el mapa de herramientas, estilos de framework, criterios de elección, matriz de decisión, ADR y el duelo de herramientas. 21 diapositivas.">
+<meta name="theme-color" content="#1d201c">
+<meta property="og:title" content="Frameworks y librerías de automatización — Presentación">
+<meta property="og:description" content="Verificación y validación · Tema 3.2 · 21 diapositivas">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --k: 1; --cols: 1; --accent: #c85a1d; --accent-on-dark: #e58444; }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #0f110e; color: #f2efe6; font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; }
+  body { overflow: hidden; }
+  body.grid { overflow: auto; height: auto; min-height: 100%; }
+
+  #viewport { position: fixed; inset: 0; overflow: hidden; }
+  body.grid #viewport { position: static; overflow: visible; display: grid; grid-template-columns: repeat(var(--cols), calc(1920px * var(--k))); gap: 24px; justify-content: center; padding: 72px 24px 120px; }
+
+  .cell { position: absolute; left: calc((100% - 1920px * var(--k)) / 2); top: calc((100% - 1080px * var(--k)) / 2); width: calc(1920px * var(--k)); height: calc(1080px * var(--k)); overflow: hidden; background: #000; opacity: 0; visibility: hidden; transition: opacity .22s ease, visibility 0s linear .22s; }
+  .cell.active { opacity: 1; visibility: visible; transition: opacity .22s ease; }
+  .cell:focus { outline: none; }
+  .cell:focus-visible { outline: 3px solid var(--accent-on-dark); outline-offset: 3px; }
+  body.grid .cell { position: relative; left: auto; top: auto; opacity: 1; visibility: visible; cursor: pointer; border-radius: 6px; box-shadow: 0 0 0 1px #3b4038; transition: box-shadow .15s ease; }
+  body.grid .cell.active { box-shadow: 0 0 0 3px var(--accent); }
+  body.grid .cell:hover { box-shadow: 0 0 0 3px var(--accent-on-dark); }
+  body.grid .cell::after { content: attr(data-n); position: absolute; left: 8px; top: 8px; min-width: 28px; height: 28px; padding: 0 8px; border-radius: 14px; background: rgba(20, 22, 18, .85); color: #f2efe6; font: 600 13px/28px 'IBM Plex Mono', monospace; text-align: center; pointer-events: none; }
+
+  /* La diapositiva: lienzo fijo de 1920x1080 escalado con --k */
+  .cell > section { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; margin: 0; overflow: hidden; transform: scale(var(--k)); transform-origin: 0 0; -webkit-text-size-adjust: none; text-size-adjust: none; }
+  .cell section p, .cell section h1, .cell section h2, .cell section h3, .cell section ul, .cell section ol, .cell section li { margin: 0; }
+  .cell section table { border-collapse: collapse; border-spacing: 0; }
+  .cell section th { font-weight: 700; }
+  .cell section b { font-weight: 700; }
+
+  /* Controles */
+  #ui-progress { position: fixed; left: 0; top: 0; width: 100%; height: 4px; z-index: 20; pointer-events: none; }
+  #ui-progress i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .25s ease; }
+  body.grid #ui-progress { display: none; }
+  #ui-bar { position: fixed; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 30; display: flex; align-items: center; gap: 4px; padding: 5px 8px; background: rgba(20, 22, 18, .88); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid #3b4038; border-radius: 999px; font-size: 14px; transition: opacity .3s ease; }
+  body.idle #ui-bar { opacity: 0; pointer-events: none; }
+  body.idle { cursor: none; }
+  #ui-bar button, #ui-bar a { all: unset; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; min-width: 40px; height: 40px; padding: 0 10px; border-radius: 999px; color: #f2efe6; cursor: pointer; font: inherit; text-decoration: none; }
+  #ui-bar button:hover, #ui-bar a:hover { background: #2a2e28; }
+  #ui-bar button:focus-visible, #ui-bar a:focus-visible { outline: 2px solid var(--accent-on-dark); outline-offset: 1px; }
+  #ui-bar button[disabled] { opacity: .35; cursor: default; }
+  #ui-bar button[disabled]:hover { background: none; }
+  #ui-bar [hidden] { display: none; }
+  #ui-count { min-width: 74px; text-align: center; color: #c9c6ba; }
+  .sep { width: 1px; height: 22px; background: #3b4038; margin: 0 4px; }
+  body.grid .only-present { display: none; }
+  #ui-hint { display: none; position: fixed; left: 24px; top: 20px; z-index: 25; color: #c9c6ba; font-size: 14px; }
+  body.grid #ui-hint { display: block; }
+  #ui-rotate { display: none; position: fixed; left: 12px; right: 12px; top: 14px; z-index: 25; padding: 8px 12px; border-radius: 8px; background: rgba(20, 22, 18, .88); color: #f2efe6; font-size: 13px; text-align: center; pointer-events: none; }
+  @media (orientation: portrait) and (max-width: 700px) { body.present #ui-rotate { display: block; } }
+  @media (prefers-reduced-motion: reduce) { .cell, #ui-progress i, #ui-bar { transition: none; } }
+
+  @media print {
+    @page { size: 1920px 1080px; margin: 0; }
+    html, body { background: #fff !important; height: auto !important; overflow: visible !important; }
+    #viewport { position: static !important; display: block !important; padding: 0 !important; overflow: visible !important; }
+    .cell { position: relative !important; left: auto !important; top: auto !important; width: 1920px !important; height: 1080px !important; opacity: 1 !important; visibility: visible !important; box-shadow: none !important; border-radius: 0 !important; break-after: page; page-break-after: always; }
+    .cell:last-child { break-after: auto; page-break-after: auto; }
+    .cell::after { display: none !important; }
+    .cell > section { transform: none !important; }
+    #ui-bar, #ui-progress, #ui-hint, #ui-rotate { display: none !important; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+<noscript><style>
+  body { overflow: auto !important; } #viewport { position: static !important; }
+  .cell { position: relative !important; left: auto !important; top: auto !important; opacity: 1 !important; visibility: visible !important; margin-bottom: 24px; }
+</style></noscript>
+</head>
+<body class="present">
+<main id="viewport" aria-label="Presentación: Frameworks y librerías de automatización — Presentación">
+<div class="cell active" data-slide="cover" data-n="1" tabindex="0" role="group" aria-roledescription="diapositiva" aria-label="1 de 21: Frameworks y librerías de automatización">
+<section style="background:#1d201c;color:#f2efe6;font-family:'Source Serif 4',Georgia,serif;padding:128px 128px 160px;display:flex;flex-direction:column;justify-content:center;gap:40px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:500;letter-spacing:4px;text-transform:uppercase;color:#e58444;line-height:1.3">Verificación y validación de software · Tema 3.2</p>
+<h1 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:150px;font-weight:700;line-height:1;color:#f2efe6">Frameworks y librerías de automatización</h1>
+<p style="font-size:48px;line-height:1.35;color:#cfcabb;width:1400px">Con qué se automatiza… y cómo elegir sin casarse por moda.</p>
+<div style="width:160px;height:8px;background:#c85a1d"></div>
+<p style="position:absolute;left:128px;bottom:64px;width:1500px;font-family:'IBM Plex Mono',monospace;font-size:26px;color:#9a9d8e">Las mismas pruebas de la tienda, vistas desde las herramientas · qa-tienda-pruebas.vercel.app</p>
+</section>
+</div>
+<div class="cell" data-slide="hilo" data-n="2" tabindex="0" role="group" aria-roledescription="diapositiva" aria-label="2 de 21: De automatizar a elegir con qué">
+<section style="background:#fbfaf5;color:#21241f;font-family:'Source Serif 4',Georgia,serif;padding:88px 128px 150px;display:flex;flex-direction:column;gap:32px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:#a84a14;line-height:1.3">Dónde estamos</p>
+<h2 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:88px;font-weight:700;line-height:1.05;color:#21241f">De automatizar a elegir con qué</h2>
+<div style="display:flex;align-items:stretch;gap:20px;padding:24px 0 0">
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#f1eee4;border:2px solid #dbd7c9;border-radius:12px;padding:36px 32px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;color:#5c6158">Paso 1</p>
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:52px;font-weight:700;line-height:1.1;color:#21241f">Lo manual</h3>
+<p style="font-size:32px;line-height:1.35;color:#3b3f38">20 historias, 61 criterios y un plan de pruebas en Jira.</p>
+</div>
+<div aria-hidden="true" style="background:#a84a14;width:56px;height:30px;align-self:center;display:block;flex:none;clip-path:polygon(0% 32%, 58% 32%, 58% 0%, 100% 50%, 58% 100%, 58% 68%, 0% 68%)"></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#f1eee4;border:2px solid #dbd7c9;border-radius:12px;padding:36px 32px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;color:#5c6158">Paso 2</p>
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:52px;font-weight:700;line-height:1.1;color:#21241f">Lo automático</h3>
+<p style="font-size:32px;line-height:1.35;color:#3b3f38">Una suite con Playwright y TypeScript que corre sola, también en GitHub.</p>
+</div>
+<div aria-hidden="true" style="background:#a84a14;width:56px;height:30px;align-self:center;display:block;flex:none;clip-path:polygon(0% 32%, 58% 32%, 58% 0%, 100% 50%, 58% 100%, 58% 68%, 0% 68%)"></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#c85a1d;border-radius:12px;padding:36px 32px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;color:#fbfaf5">Hoy</p>
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:52px;font-weight:700;line-height:1.1;color:#fbfaf5">Las herramientas</h3>
+<p style="font-size:32px;line-height:1.35;color:#fbfaf5">Qué es cada pieza, qué más existe y cómo se elige.</p>
+</div>
+<div aria-hidden="true" style="background:#a84a14;width:56px;height:30px;align-self:center;display:block;flex:none;clip-path:polygon(0% 32%, 58% 32%, 58% 0%, 100% 50%, 58% 100%, 58% 68%, 0% 68%)"></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#f1eee4;border:2px solid #dbd7c9;border-radius:12px;padding:36px 32px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;color:#5c6158">Luego</p>
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:52px;font-weight:700;line-height:1.1;color:#21241f">La decisión</h3>
+<p style="font-size:32px;line-height:1.35;color:#3b3f38">Elegir con criterios y dejarlo por escrito.</p>
+</div>
+</div>
+<p style="font-size:38px;line-height:1.4;color:#3b3f38;width:1560px">En 3.1 aprendieron a automatizar. Hoy aprenden a <b>elegir con qué</b>.</p>
+<p style="position:absolute;left:128px;bottom:56px;width:1400px;font-family:'IBM Plex Mono',monospace;font-size:24px;color:#6b6f63">Verificación y validación · Tema 3.2</p>
+</section>
+</div>
+<div class="cell" data-slide="pregunta" data-n="3" tabindex="0" role="group" aria-roledescription="diapositiva" aria-label="3 de 21: Usamos Playwright sin discutirlo.">
+<section style="background:#c85a1d;color:#fbfaf5;font-family:'Source Serif 4',Georgia,serif;padding:128px 128px 128px;display:flex;flex-direction:column;justify-content:center;gap:36px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#fbfaf5;line-height:1.3">Para pensar dos minutos</p>
+<h2 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:164px;font-weight:700;line-height:1;color:#fbfaf5">Usamos Playwright sin discutirlo.</h2>
+<p style="font-size:60px;line-height:1.25;color:#fbfaf5;width:1500px">¿Con qué criterios lo habrían elegido ustedes?</p>
+</section>
+</div>
+<div class="cell" data-slide="libreria-framework" data-n="4" tabindex="0" role="group" aria-roledescription="diapositiva" aria-label="4 de 21: Librería o framework">
+<section style="background:#fbfaf5;color:#21241f;font-family:'Source Serif 4',Georgia,serif;padding:88px 128px 150px;display:flex;flex-direction:column;gap:32px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:#a84a14;line-height:1.3">Dos palabras que se confunden</p>
+<h2 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:88px;font-weight:700;line-height:1.05;color:#21241f">Librería o framework</h2>
+<div style="display:flex;gap:32px;padding:4px 0 0">
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#f1eee4;border-top:8px solid #a84a14;padding:26px 34px 32px">
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:60px;font-weight:700;line-height:1.05;color:#a84a14">Librería: tú la llamas</h3>
+<p style="font-size:30px;line-height:1.3;color:#3b3f38">Tu código manda; la librería es una caja de herramientas.</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.35;font-weight:600;color:#5c6158">Selenium WebDriver · Puppeteer · axe-core · Faker</p>
+<div style="display:flex;flex-direction:column;gap:0;background:#1d201c;border-radius:10px;padding:18px 24px 20px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#f2efe6;white-space:nowrap">const browser = await chromium.launch();</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#f2efe6;white-space:nowrap">const page = await browser.newPage();</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#f2efe6;white-space:nowrap">await page.goto(URL);</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#f2efe6;white-space:nowrap">await browser.close();</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#f1eee4;border-top:8px solid #21241f;padding:26px 34px 32px">
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:60px;font-weight:700;line-height:1.05;color:#21241f">Framework: él te llama</h3>
+<p style="font-size:30px;line-height:1.3;color:#3b3f38">El framework manda: encuentra tus pruebas, las ejecuta y te entrega lo que necesitan.</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.35;font-weight:600;color:#5c6158">JUnit · pytest · Jest · Cypress · Playwright Test</p>
+<div style="display:flex;flex-direction:column;gap:0;background:#1d201c;border-radius:10px;padding:18px 24px 20px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#f2efe6;white-space:nowrap">test('CA1: …', async ({ page }) =&gt; {</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#9a9d8e;white-space:nowrap">&#160;&#160;// page ya viene abierto y se cierra solo</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#f2efe6;white-space:nowrap">&#160;&#160;await page.goto('/');</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#f2efe6;white-space:nowrap">});</p>
+</div>
+</div>
+</div>
+<p style="font-size:34px;line-height:1.4;color:#21241f;width:1640px"><b>Inversión de control:</b> «no nos llames, nosotros te llamamos». En el laboratorio nunca escribieron <span style="color:#a84a14">chromium.launch()</span>: el framework abrió el navegador por ustedes.</p>
+<p style="position:absolute;left:128px;bottom:56px;width:1400px;font-family:'IBM Plex Mono',monospace;font-size:24px;color:#6b6f63">Verificación y validación · Tema 3.2</p>
+</section>
+</div>
+<div class="cell" data-slide="dos-significados" data-n="5" tabindex="0" role="group" aria-roledescription="diapositiva" aria-label="5 de 21: Dos significados de «framework»">
+<section style="background:#eae7de;color:#21241f;font-family:'Source Serif 4',Georgia,serif;padding:88px 128px 150px;display:flex;flex-direction:column;gap:32px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:#a84a14;line-height:1.3">Otra confusión frecuente</p>
+<h2 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:88px;font-weight:700;line-height:1.05;color:#21241f">Dos significados de «framework»</h2>
+<div style="display:flex;gap:32px;padding:8px 0 0">
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#fbfaf5;border-top:10px solid #a84a14;padding:32px 40px 40px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#a84a14">1 · El producto</p>
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:60px;font-weight:700;line-height:1.05;color:#21241f">Una herramienta que se elige</h3>
+<p style="font-size:32px;line-height:1.35;color:#3b3f38">Playwright Test, Cypress, Robot Framework, Selenium con JUnit…</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:600;color:#21241f">Se descarga.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#fbfaf5;border-top:10px solid #21241f;padding:32px 40px 40px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#21241f">2 · La estructura propia</p>
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:60px;font-weight:700;line-height:1.05;color:#21241f">Una forma de trabajar que se construye</h3>
+<p style="font-size:32px;line-height:1.35;color:#3b3f38">Carpetas, Page Objects, datos, informes y ejecución en integración continua.</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:600;color:#21241f">Se construye.</p>
+</div>
+</div>
+<p style="font-size:40px;line-height:1.35;color:#21241f;width:1600px">La herramienta se descarga; <b>el framework de verdad se construye encima</b>.</p>
+<p style="position:absolute;left:128px;bottom:56px;width:1400px;font-family:'IBM Plex Mono',monospace;font-size:24px;color:#5c6158">Verificación y validación · Tema 3.2</p>
+</section>
+</div>
+<div class="cell" data-slide="ya-armaron" data-n="6" tabindex="0" role="group" aria-roledescription="diapositiva" aria-label="6 de 21: Ya armaron un framework">
+<section style="background:#fbfaf5;color:#21241f;font-family:'Source Serif 4',Georgia,serif;padding:88px 128px 150px;display:flex;flex-direction:column;gap:32px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:#a84a14;line-height:1.3">En su laboratorio</p>
+<h2 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:88px;font-weight:700;line-height:1.05;color:#21241f">Ya armaron un framework</h2>
+<table style="width:1664px;font-size:27px;color:#21241f;background:#fbfaf5">
+<tr><th style="width:27%;text-align:left;padding:11px 20px;color:#5c6158">Pieza</th><th style="width:43%;text-align:left;padding:11px 20px;color:#5c6158">En el laboratorio</th><th style="width:30%;text-align:left;padding:11px 20px;color:#5c6158">¿De quién es?</th></tr>
+<tr style="background:#f1eee4"><td style="padding:11px 20px"><b>Ejecutor de pruebas</b></td><td style="padding:11px 20px">npx playwright test</td><td style="padding:11px 20px">Herramienta</td></tr>
+<tr><td style="padding:11px 20px"><b>Navegador y aserciones</b></td><td style="padding:11px 20px">page, locator, expect</td><td style="padding:11px 20px">Herramienta</td></tr>
+<tr style="background:#f1dcc9"><td style="padding:11px 20px"><b>Configuración</b></td><td style="padding:11px 20px">playwright.config.ts</td><td style="padding:11px 20px"><b>De ustedes</b></td></tr>
+<tr style="background:#f1dcc9"><td style="padding:11px 20px"><b>Pruebas y datos</b></td><td style="padding:11px 20px">tests/*.spec.ts, CORREOS_VALIDOS</td><td style="padding:11px 20px"><b>De ustedes</b></td></tr>
+<tr style="background:#f1dcc9"><td style="padding:11px 20px"><b>Page Object</b></td><td style="padding:11px 20px">pages/TiendaPage.ts</td><td style="padding:11px 20px"><b>De ustedes</b></td></tr>
+<tr><td style="padding:11px 20px"><b>Informes y evidencia</b></td><td style="padding:11px 20px">Informe HTML, captura y trace</td><td style="padding:11px 20px">Herramienta</td></tr>
+<tr style="background:#f1eee4"><td style="padding:11px 20px"><b>Ejecución automática</b></td><td style="padding:11px 20px">GitHub Actions</td><td style="padding:11px 20px">Servicio externo</td></tr>
+<tr><td style="padding:11px 20px"><b>Accesibilidad (bonus)</b></td><td style="padding:11px 20px">@axe-core/playwright</td><td style="padding:11px 20px">Librería enchufada</td></tr>
+</table>
+<p style="font-size:32px;line-height:1.4;color:#3b3f38;width:1640px">Si mañana cambiaran de herramienta, ¿qué filas tendrían que reescribir?</p>
+<p style="position:absolute;left:128px;bottom:56px;width:1400px;font-family:'IBM Plex Mono',monospace;font-size:24px;color:#6b6f63">Verificación y validación · Tema 3.2</p>
+</section>
+</div>
+<div class="cell" data-slide="anatomia" data-n="7" tabindex="0" role="group" aria-roledescription="diapositiva" aria-label="7 de 21: Anatomía de un framework de automatización">
+<section style="background:#eae7de;color:#21241f;font-family:'Source Serif 4',Georgia,serif;padding:88px 128px 150px;display:flex;flex-direction:column;gap:32px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:#a84a14;line-height:1.3">Cuatro capas y una columna transversal</p>
+<h2 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:88px;font-weight:700;line-height:1.05;color:#21241f">Anatomía de un framework de automatización</h2>
+<div style="display:flex;gap:28px;align-items:stretch">
+<div style="width:1130px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:24px;background:#fbfaf5;border-left:14px solid #f0cdb3;padding:16px 26px 18px">
+<p style="width:250px;font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#a84a14">Generación</p>
+<p style="width:790px;font-size:29px;line-height:1.3;color:#3b3f38">De dónde salen las pruebas: los criterios Dado · Cuando · Entonces, o el grabador como borrador.</p>
+</div>
+<div style="display:flex;align-items:center;gap:24px;background:#fbfaf5;border-left:14px solid #e29a6d;padding:16px 26px 18px">
+<p style="width:250px;font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#a84a14">Definición</p>
+<p style="width:790px;font-size:29px;line-height:1.3;color:#3b3f38">Qué se prueba: los tests, los datos y los Page Objects.</p>
+</div>
+<div style="display:flex;align-items:center;gap:24px;background:#fbfaf5;border-left:14px solid #c85a1d;padding:16px 26px 18px">
+<p style="width:250px;font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#a84a14">Ejecución</p>
+<p style="width:790px;font-size:29px;line-height:1.3;color:#3b3f38">Cuándo y cómo corren: ejecutor, aserciones, esperas, reintentos, paralelismo e informes.</p>
+</div>
+<div style="display:flex;align-items:center;gap:24px;background:#fbfaf5;border-left:14px solid #a84a14;padding:16px 26px 18px">
+<p style="width:250px;font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#a84a14">Adaptación</p>
+<p style="width:790px;font-size:29px;line-height:1.3;color:#3b3f38">Cómo se habla con lo que se prueba: el navegador por su protocolo, una API por HTTP.</p>
+</div>
+</div>
+<div style="width:506px;display:flex;flex-direction:column;gap:12px;background:#1d201c;border-radius:12px;padding:28px 32px 32px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#e58444">Transversal</p>
+<p style="font-size:30px;line-height:1.3;color:#f2efe6">Configuración</p>
+<p style="font-size:30px;line-height:1.3;color:#f2efe6">Datos de prueba</p>
+<p style="font-size:30px;line-height:1.3;color:#f2efe6">Informes y trazabilidad con Jira</p>
+<p style="font-size:30px;line-height:1.3;color:#f2efe6">Integración continua</p>
+</div>
+</div>
+<p style="font-size:34px;line-height:1.4;color:#21241f;width:1640px">Si cambian de herramienta, se conserva <b>el diseño de las pruebas</b>: casos, datos y oráculos.</p>
+<p style="position:absolute;left:128px;bottom:56px;width:1600px;font-family:'IBM Plex Mono',monospace;font-size:24px;color:#5c6158">Basado en la arquitectura genérica de automatización (gTAA) del ISTQB, nivel avanzado</p>
+</section>
+</div>
+<div class="cell" data-slide="piramide-herramientas" data-n="8" tabindex="0" role="group" aria-roledescription="diapositiva" aria-label="8 de 21: Cada nivel tiene sus herramientas">
+<section style="background:#fbfaf5;color:#21241f;font-family:'Source Serif 4',Georgia,serif;padding:88px 128px 150px;display:flex;flex-direction:column;gap:30px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:#a84a14;line-height:1.3">El mapa</p>
+<h2 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:88px;font-weight:700;line-height:1.05;color:#21241f">Cada nivel tiene sus herramientas</h2>
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;align-items:center;gap:40px">
+<div style="width:1000px;display:flex;justify-content:center">
+<div style="width:440px;height:120px;background:#f0cdb3;display:flex;align-items:center;justify-content:center"><h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:52px;font-weight:700;line-height:1.1;color:#21241f">Interfaz (E2E)</h3></div>
+</div>
+<p style="width:620px;font-size:34px;line-height:1.25;color:#21241f">Playwright · Cypress · Selenium</p>
+</div>
+<div style="display:flex;align-items:center;gap:40px">
+<div style="width:1000px;display:flex;justify-content:center">
+<div style="width:720px;height:120px;background:#e29a6d;display:flex;align-items:center;justify-content:center"><h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:52px;font-weight:700;line-height:1.1;color:#21241f">Servicios y API</h3></div>
+</div>
+<p style="width:620px;font-size:34px;line-height:1.25;color:#21241f">Postman · REST Assured · Supertest · Pact</p>
+</div>
+<div style="display:flex;align-items:center;gap:40px">
+<div style="width:1000px;display:flex;justify-content:center">
+<div style="width:1000px;height:120px;background:#a84a14;display:flex;align-items:center;justify-content:center"><h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:52px;font-weight:700;line-height:1.1;color:#fbfaf5">Unitarias</h3></div>
+</div>
+<p style="width:620px;font-size:34px;line-height:1.25;color:#21241f">JUnit · pytest · Jest · PHPUnit</p>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:16px;padding:6px 0 0">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#5c6158">Transversales</p>
+<p style="font-size:28px;line-height:1.2;background:#f1eee4;border:2px solid #dbd7c9;padding:10px 22px;border-radius:50%;color:#21241f">Rendimiento: k6 · JMeter</p>
+<p style="font-size:28px;line-height:1.2;background:#f1eee4;border:2px solid #dbd7c9;padding:10px 22px;border-radius:50%;color:#21241f">Accesibilidad: axe-core</p>
+<p style="font-size:28px;line-height:1.2;background:#f1eee4;border:2px solid #dbd7c9;padding:10px 22px;border-radius:50%;color:#21241f">Visual: Percy · Applitools</p>
+<p style="font-size:28px;line-height:1.2;background:#f1eee4;border:2px solid #dbd7c9;padding:10px 22px;border-radius:50%;color:#21241f">Móvil: Appium</p>
+</div>
+<p style="font-size:34px;line-height:1.4;color:#21241f;width:1640px">En 3.1 estuvimos en la punta. Hoy miramos <b>toda la pirámide</b>.</p>
+<p style="position:absolute;left:128px;bottom:56px;width:1400px;font-family:'IBM Plex Mono',monospace;font-size:24px;color:#6b6f63">Verificación y validación · Tema 3.2 · herramientas a octubre de 2026</p>
+</section>
+</div>
+<div class="cell" data-slide="ui-filosofias" data-n="9" tabindex="0" role="group" aria-roledescription="diapositiva" aria-label="9 de 21: Tres formas de controlar un navegador">
+<section style="background:#eae7de;color:#21241f;font-family:'Source Serif 4',Georgia,serif;padding:88px 128px 150px;display:flex;flex-direction:column;gap:30px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:#a84a14;line-height:1.3">Pruebas de interfaz</p>
+<h2 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:88px;font-weight:700;line-height:1.05;color:#21241f">Tres formas de controlar un navegador</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px">
+<div style="display:flex;flex-direction:column;gap:6px;background:#fbfaf5;border-top:10px solid #21241f;padding:22px 28px 28px">
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:60px;font-weight:700;line-height:1.05;color:#21241f">Selenium</h3>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#a84a14;line-height:1.3">Cómo funciona</p>
+<p style="font-size:27px;line-height:1.3;color:#21241f">Un driver por navegador traduce las órdenes con el estándar W3C WebDriver.</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#a84a14;line-height:1.3">Lenguajes</p>
+<p style="font-size:27px;line-height:1.3;color:#21241f">Java, Python, C#, JavaScript, Ruby</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#a84a14;line-height:1.3">Navegadores</p>
+<p style="font-size:27px;line-height:1.3;color:#21241f">Chrome, Edge, Firefox, Safari</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#a84a14;line-height:1.3">Esperas</p>
+<p style="font-size:27px;line-height:1.3;color:#21241f">Las programas tú</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#fbfaf5;border-top:10px solid #21241f;padding:22px 28px 28px">
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:60px;font-weight:700;line-height:1.05;color:#21241f">Cypress</h3>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#a84a14;line-height:1.3">Cómo funciona</p>
+<p style="font-size:27px;line-height:1.3;color:#21241f">La prueba corre dentro del navegador, junto a la aplicación.</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#a84a14;line-height:1.3">Lenguajes</p>
+<p style="font-size:27px;line-height:1.3;color:#21241f">JavaScript y TypeScript</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#a84a14;line-height:1.3">Navegadores</p>
+<p style="font-size:27px;line-height:1.3;color:#21241f">Chrome, Edge, Firefox (WebKit, experimental)</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#a84a14;line-height:1.3">Esperas</p>
+<p style="font-size:27px;line-height:1.3;color:#21241f">Reintenta solo comandos y aserciones</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#fbfaf5;border-top:10px solid #c85a1d;padding:22px 28px 28px">
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:60px;font-weight:700;line-height:1.05;color:#a84a14">Playwright</h3>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#a84a14;line-height:1.3">Cómo funciona</p>
+<p style="font-size:27px;line-height:1.3;color:#21241f">Un proceso externo controla el navegador por su protocolo.</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#a84a14;line-height:1.3">Lenguajes</p>
+<p style="font-size:27px;line-height:1.3;color:#21241f">TypeScript y JavaScript, Python, Java, .NET</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#a84a14;line-height:1.3">Navegadores</p>
+<p style="font-size:27px;line-height:1.3;color:#21241f">Chromium, Firefox, WebKit</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#a84a14;line-height:1.3">Esperas</p>
+<p style="font-size:27px;line-height:1.3;color:#21241f">Espera sola; las aserciones reintentan</p>
+</div>
+</div>
+<p style="font-size:30px;line-height:1.4;color:#3b3f38;width:1640px">Selenium es una librería (necesita ejecutor); Cypress y Playwright Test son frameworks. En naranja, la que usaron.</p>
+<p style="position:absolute;left:128px;bottom:56px;width:1400px;font-family:'IBM Plex Mono',monospace;font-size:24px;color:#5c6158">Verificación y validación · Tema 3.2 · datos a octubre de 2026</p>
+</section>
+</div>
+<div class="cell" data-slide="misma-prueba" data-n="10" tabindex="0" role="group" aria-roledescription="diapositiva" aria-label="10 de 21: La misma prueba en tres herramientas">
+<section style="background:#1d201c;color:#f2efe6;font-family:'Source Serif 4',Georgia,serif;padding:88px 128px 150px;display:flex;flex-direction:column;gap:28px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:#e58444;line-height:1.3">El mismo criterio de aceptación</p>
+<h2 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:88px;font-weight:700;line-height:1.05;color:#f2efe6">La misma prueba en tres herramientas</h2>
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;gap:28px;align-items:stretch">
+<div style="width:330px;display:flex;flex-direction:column;justify-content:center;gap:6px">
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:56px;font-weight:700;line-height:1.05;color:#e58444">Selenium</h3>
+<p style="font-size:26px;line-height:1.3;color:#cfcabb">Librería: faltan el ejecutor, las aserciones y los informes.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:0;background:#262a24;border-radius:10px;padding:18px 26px 20px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.45;color:#f2efe6;white-space:nowrap">const driver = await new Builder().forBrowser('chrome').build();</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.45;color:#f2efe6;white-space:nowrap">await driver.get(URL);</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.45;color:#f2efe6;white-space:nowrap">await driver.wait(until.elementLocated(By.css('h3')), 5000);</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.45;color:#f2efe6;white-space:nowrap">assert.equal((await driver.findElements(By.css('h3'))).length, 8);</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.45;color:#f2efe6;white-space:nowrap">await driver.quit();</p>
+</div>
+</div>
+<div style="display:flex;gap:28px;align-items:stretch">
+<div style="width:330px;display:flex;flex-direction:column;justify-content:center;gap:6px">
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:56px;font-weight:700;line-height:1.05;color:#e58444">Cypress</h3>
+<p style="font-size:26px;line-height:1.3;color:#cfcabb">Framework: todo incluido y reintenta solo.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:0;background:#262a24;border-radius:10px;padding:18px 26px 20px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.45;color:#f2efe6;white-space:nowrap">it('CA1: el catálogo muestra 8 productos', () =&gt; {</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.45;color:#f2efe6;white-space:nowrap">&#160;&#160;cy.visit('/');</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.45;color:#f2efe6;white-space:nowrap">&#160;&#160;cy.get('h3').should('have.length', 8);</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.45;color:#f2efe6;white-space:nowrap">});</p>
+</div>
+</div>
+<div style="display:flex;gap:28px;align-items:stretch">
+<div style="width:330px;display:flex;flex-direction:column;justify-content:center;gap:6px">
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:56px;font-weight:700;line-height:1.05;color:#e58444">Playwright</h3>
+<p style="font-size:26px;line-height:1.3;color:#cfcabb">Framework: todo incluido y espera solo.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:0;background:#262a24;border-radius:10px;padding:18px 26px 20px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.45;color:#f2efe6;white-space:nowrap">test('CA1: el catálogo muestra 8 productos', async ({ page }) =&gt; {</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.45;color:#f2efe6;white-space:nowrap">&#160;&#160;await page.goto('/');</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.45;color:#f2efe6;white-space:nowrap">&#160;&#160;await expect(page.getByRole('heading', { level: 3 })).toHaveCount(8);</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.45;color:#f2efe6;white-space:nowrap">});</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:56px;width:1600px;font-family:'IBM Plex Mono',monospace;font-size:24px;color:#9a9d8e">CA1 de US-01: el catálogo muestra 8 productos · Verificación y validación · Tema 3.2</p>
+</section>
+</div>
+<div class="cell" data-slide="mas-alla" data-n="11" tabindex="0" role="group" aria-roledescription="diapositiva" aria-label="11 de 21: Más allá de la interfaz">
+<section style="background:#fbfaf5;color:#21241f;font-family:'Source Serif 4',Georgia,serif;padding:88px 128px 150px;display:flex;flex-direction:column;gap:32px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:#a84a14;line-height:1.3">Otros propósitos</p>
+<h2 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:88px;font-weight:700;line-height:1.05;color:#21241f">Más allá de la interfaz</h2>
+<table style="width:1664px;font-size:26px;color:#21241f;background:#fbfaf5">
+<tr><th style="width:23%;text-align:left;padding:12px 20px;color:#5c6158">Para…</th><th style="width:36%;text-align:left;padding:12px 20px;color:#5c6158">Herramientas comunes</th><th style="width:41%;text-align:left;padding:12px 20px;color:#5c6158">En nuestra tienda sería…</th></tr>
+<tr style="background:#f1eee4"><td style="padding:12px 20px"><b>Reglas de negocio</b></td><td style="padding:12px 20px">JUnit · pytest · Jest · PHPUnit</td><td style="padding:12px 20px">El IVA con descuento, sin abrir el navegador</td></tr>
+<tr><td style="padding:12px 20px"><b>Servicios y contratos</b></td><td style="padding:12px 20px">Postman · REST Assured · Supertest · Pact</td><td style="padding:12px 20px">Pedidos y stock, si la tienda tuviera servidor</td></tr>
+<tr style="background:#f1eee4"><td style="padding:12px 20px"><b>Carga y rendimiento</b></td><td style="padding:12px 20px">k6 · JMeter · Gatling · Locust</td><td style="padding:12px 20px">¿Cuántos compradores a la vez aguanta?</td></tr>
+<tr><td style="padding:12px 20px"><b>Accesibilidad</b></td><td style="padding:12px 20px">axe-core · Lighthouse · Pa11y</td><td style="padding:12px 20px">Las etiquetas del checkout y el contraste (US-20)</td></tr>
+<tr style="background:#f1eee4"><td style="padding:12px 20px"><b>Aspecto visual</b></td><td style="padding:12px 20px">Percy · Applitools · capturas de Playwright</td><td style="padding:12px 20px">Que el catálogo no se «rompa» al cambiar el CSS</td></tr>
+<tr><td style="padding:12px 20px"><b>Móvil nativo</b></td><td style="padding:12px 20px">Appium · Espresso · XCUITest</td><td style="padding:12px 20px">Si la tienda fuera una app de Android o iOS</td></tr>
+</table>
+<p style="font-size:34px;line-height:1.4;color:#21241f;width:1640px">Una herramienta rara vez cubre todo: <b>se combinan</b>. En el laboratorio sumaron axe a Playwright.</p>
+<p style="position:absolute;left:128px;bottom:56px;width:1400px;font-family:'IBM Plex Mono',monospace;font-size:24px;color:#6b6f63">Verificación y validación · Tema 3.2 · herramientas a octubre de 2026</p>
+</section>
+</div>
+<div class="cell" data-slide="estilos" data-n="12" tabindex="0" role="group" aria-roledescription="diapositiva" aria-label="12 de 21: Cinco estilos de framework">
+<section style="background:#eae7de;color:#21241f;font-family:'Source Serif 4',Georgia,serif;padding:88px 128px 150px;display:flex;flex-direction:column;gap:32px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:#a84a14;line-height:1.3">Cómo se organiza una suite</p>
+<h2 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:88px;font-weight:700;line-height:1.05;color:#21241f">Cinco estilos de framework</h2>
+<table style="width:1664px;font-size:26px;color:#21241f;background:#fbfaf5">
+<tr><th style="width:27%;text-align:left;padding:12px 20px;color:#5c6158">Estilo</th><th style="width:37%;text-align:left;padding:12px 20px;color:#5c6158">La idea</th><th style="width:36%;text-align:left;padding:12px 20px;color:#5c6158">Cuándo conviene</th></tr>
+<tr><td style="padding:12px 20px"><b>Lineal</b> (grabar y reproducir)</td><td style="padding:12px 20px">Una lista de pasos, sin estructura</td><td style="padding:12px 20px">Un prototipo que se va a tirar</td></tr>
+<tr style="background:#f1dcc9"><td style="padding:12px 20px"><b>Modular</b> (Page Object)</td><td style="padding:12px 20px">Piezas reutilizables, una por pantalla</td><td style="padding:12px 20px">Casi siempre. <b>Lo hicieron en la Parte 5</b></td></tr>
+<tr style="background:#f1dcc9"><td style="padding:12px 20px"><b>Dirigido por datos</b></td><td style="padding:12px 20px">La misma prueba con una tabla de datos</td><td style="padding:12px 20px">Muchas combinaciones. <b>Lo hicieron en la Parte 4</b></td></tr>
+<tr><td style="padding:12px 20px"><b>Por palabras clave</b></td><td style="padding:12px 20px">Pruebas escritas con verbos, casi sin programar (Robot Framework)</td><td style="padding:12px 20px">Equipos con poco código y vocabulario estable</td></tr>
+<tr style="background:#f1eee4"><td style="padding:12px 20px"><b>BDD</b> (Gherkin)</td><td style="padding:12px 20px">Escenarios Dado · Cuando · Entonces que se ejecutan (Cucumber)</td><td style="padding:12px 20px">Cuando el negocio lee y mantiene los escenarios</td></tr>
+</table>
+<p style="font-size:34px;line-height:1.4;color:#21241f;width:1640px">No se elige uno: <b>se combinan</b>. Lo habitual es modular más datos. En naranja, lo que ya hicieron.</p>
+<p style="position:absolute;left:128px;bottom:56px;width:1400px;font-family:'IBM Plex Mono',monospace;font-size:24px;color:#5c6158">Verificación y validación · Tema 3.2</p>
+</section>
+</div>
+<div class="cell" data-slide="bdd" data-n="13" tabindex="0" role="group" aria-roledescription="diapositiva" aria-label="13 de 21: Sus criterios ya casi son Gherkin">
+<section style="background:#fbfaf5;color:#21241f;font-family:'Source Serif 4',Georgia,serif;padding:88px 128px 150px;display:flex;flex-direction:column;gap:30px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:#a84a14;line-height:1.3">Un estilo en detalle: BDD</p>
+<h2 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:88px;font-weight:700;line-height:1.05;color:#21241f">Sus criterios ya casi son Gherkin</h2>
+<div style="display:flex;gap:28px;align-items:stretch">
+<div style="width:790px;display:flex;flex-direction:column;gap:0;background:#1d201c;border-radius:12px;padding:24px 28px 28px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#e58444;padding:0 0 14px">El escenario (Gherkin en español)</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#f2efe6;white-space:nowrap">Característica: Ver el catálogo</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#f2efe6;white-space:nowrap">&#160;</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#f2efe6;white-space:nowrap">&#160;&#160;Escenario: El catálogo muestra 8 productos</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#e58444;white-space:nowrap">&#160;&#160;&#160;&#160;Dado que abro la tienda</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#e58444;white-space:nowrap">&#160;&#160;&#160;&#160;Entonces veo 8 productos</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:0;background:#1d201c;border-radius:12px;padding:24px 28px 28px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#e58444;padding:0 0 14px">Los pasos (Cucumber + Playwright)</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#f2efe6;white-space:nowrap">Given('que abro la tienda', async function () {</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#f2efe6;white-space:nowrap">&#160;&#160;await this.page.goto('/');</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#f2efe6;white-space:nowrap">});</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#f2efe6;white-space:nowrap">Then('veo {int} productos', async function (n) {</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#f2efe6;white-space:nowrap">&#160;&#160;await expect(</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#f2efe6;white-space:nowrap">&#160;&#160;&#160;&#160;this.page.getByRole('heading', { level: 3 })</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#f2efe6;white-space:nowrap">&#160;&#160;).toHaveCount(n);</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#f2efe6;white-space:nowrap">});</p>
+</div>
+</div>
+<p style="font-size:32px;line-height:1.4;color:#3b3f38;width:1640px">Agrega un archivo de escenarios, las definiciones de pasos y el ejecutor Cucumber.</p>
+<p style="font-size:36px;line-height:1.35;color:#21241f;width:1640px"><b>¿Vale la pena?</b> Solo si el negocio lee y mantiene los escenarios.</p>
+<p style="position:absolute;left:128px;bottom:56px;width:1400px;font-family:'IBM Plex Mono',monospace;font-size:24px;color:#6b6f63">Verificación y validación · Tema 3.2</p>
+</section>
+</div>
+<div class="cell" data-slide="criterios" data-n="14" tabindex="0" role="group" aria-roledescription="diapositiva" aria-label="14 de 21: Ocho criterios para elegir">
+<section style="background:#fbfaf5;color:#21241f;font-family:'Source Serif 4',Georgia,serif;padding:88px 128px 150px;display:flex;flex-direction:column;gap:30px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:#a84a14;line-height:1.3">Elegir con criterio</p>
+<h2 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:88px;font-weight:700;line-height:1.05;color:#21241f">Ocho criterios para elegir</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:24px">
+<div style="display:flex;flex-direction:column;gap:6px;background:#f1eee4;border-top:8px solid #a84a14;padding:20px 26px 26px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#5c6158">Criterio 1</p>
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:42px;font-weight:700;line-height:1.1;color:#21241f">Encaje con el equipo</h3>
+<p style="font-size:27px;line-height:1.3;color:#3b3f38">¿Qué lenguaje y qué herramientas ya dominan?</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#f1eee4;border-top:8px solid #a84a14;padding:20px 26px 26px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#5c6158">Criterio 2</p>
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:42px;font-weight:700;line-height:1.1;color:#21241f">Cobertura</h3>
+<p style="font-size:27px;line-height:1.3;color:#3b3f38">¿Qué navegadores, móviles o APIs hay que cubrir?</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#f1eee4;border-top:8px solid #a84a14;padding:20px 26px 26px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#5c6158">Criterio 3</p>
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:42px;font-weight:700;line-height:1.1;color:#21241f">Estabilidad</h3>
+<p style="font-size:27px;line-height:1.3;color:#3b3f38">¿Espera sola o las esperas se programan a mano?</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#f1eee4;border-top:8px solid #a84a14;padding:20px 26px 26px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#5c6158">Criterio 4</p>
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:42px;font-weight:700;line-height:1.1;color:#21241f">Diagnóstico</h3>
+<p style="font-size:27px;line-height:1.3;color:#3b3f38">¿Se ve por qué falló? Capturas, trace, video.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#f1eee4;border-top:8px solid #a84a14;padding:20px 26px 26px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#5c6158">Criterio 5</p>
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:42px;font-weight:700;line-height:1.1;color:#21241f">Velocidad</h3>
+<p style="font-size:27px;line-height:1.3;color:#3b3f38">¿Cuánto tarda la suite y cómo se reparte en paralelo?</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#f1eee4;border-top:8px solid #a84a14;padding:20px 26px 26px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#5c6158">Criterio 6</p>
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:42px;font-weight:700;line-height:1.1;color:#21241f">Integración</h3>
+<p style="font-size:27px;line-height:1.3;color:#3b3f38">¿Se lleva bien con CI, informes y Jira?</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#f1eee4;border-top:8px solid #a84a14;padding:20px 26px 26px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#5c6158">Criterio 7</p>
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:42px;font-weight:700;line-height:1.1;color:#21241f">Comunidad y futuro</h3>
+<p style="font-size:27px;line-height:1.3;color:#3b3f38">¿Quién la mantiene y hasta cuándo?</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#f1eee4;border-top:8px solid #a84a14;padding:20px 26px 26px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#5c6158">Criterio 8</p>
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:42px;font-weight:700;line-height:1.1;color:#21241f">Costo total</h3>
+<p style="font-size:27px;line-height:1.3;color:#3b3f38">Licencias, aprendizaje y mantenimiento.</p>
+</div>
+</div>
+<p style="font-size:36px;line-height:1.4;color:#21241f;width:1640px">Ninguna herramienta gana en todos: <b>se pesan según el proyecto</b>.</p>
+<p style="position:absolute;left:128px;bottom:56px;width:1400px;font-family:'IBM Plex Mono',monospace;font-size:24px;color:#6b6f63">Verificación y validación · Tema 3.2</p>
+</section>
+</div>
+<div class="cell" data-slide="matriz" data-n="15" tabindex="0" role="group" aria-roledescription="diapositiva" aria-label="15 de 21: La matriz de decisión">
+<section style="background:#eae7de;color:#21241f;font-family:'Source Serif 4',Georgia,serif;padding:88px 128px 150px;display:flex;flex-direction:column;gap:28px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:#a84a14;line-height:1.3">Hacer la comparación explícita</p>
+<h2 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:88px;font-weight:700;line-height:1.05;color:#21241f">La matriz de decisión</h2>
+<p style="font-size:30px;line-height:1.35;color:#3b3f38;width:1640px">Escenario ilustrativo: equipo de 4 personas, aplicación web en React, integración continua en GitHub.</p>
+<table style="width:1664px;font-size:27px;color:#21241f;background:#fbfaf5">
+<tr><th style="width:34%;text-align:left;padding:12px 20px;color:#5c6158">Criterio</th><th style="width:10%;text-align:center;padding:12px 20px;color:#5c6158">Peso</th><th style="width:18%;text-align:center;padding:12px 20px;color:#5c6158">Selenium</th><th style="width:18%;text-align:center;padding:12px 20px;color:#5c6158">Cypress</th><th style="width:20%;text-align:center;padding:12px 20px;color:#5c6158">Playwright</th></tr>
+<tr><td style="padding:12px 20px">Encaje con el equipo (TypeScript)</td><td style="text-align:center;padding:12px 20px">5</td><td style="text-align:center;padding:12px 20px">3</td><td style="text-align:center;padding:12px 20px">5</td><td style="text-align:center;padding:12px 20px">5</td></tr>
+<tr style="background:#f1eee4"><td style="padding:12px 20px">Estabilidad (esperas)</td><td style="text-align:center;padding:12px 20px">4</td><td style="text-align:center;padding:12px 20px">2</td><td style="text-align:center;padding:12px 20px">4</td><td style="text-align:center;padding:12px 20px">5</td></tr>
+<tr><td style="padding:12px 20px">Diagnóstico</td><td style="text-align:center;padding:12px 20px">3</td><td style="text-align:center;padding:12px 20px">2</td><td style="text-align:center;padding:12px 20px">5</td><td style="text-align:center;padding:12px 20px">5</td></tr>
+<tr style="background:#f1eee4"><td style="padding:12px 20px">Cobertura de navegadores</td><td style="text-align:center;padding:12px 20px">2</td><td style="text-align:center;padding:12px 20px">5</td><td style="text-align:center;padding:12px 20px">3</td><td style="text-align:center;padding:12px 20px">4</td></tr>
+<tr><td style="padding:12px 20px">Comunidad y futuro</td><td style="text-align:center;padding:12px 20px">3</td><td style="text-align:center;padding:12px 20px">5</td><td style="text-align:center;padding:12px 20px">4</td><td style="text-align:center;padding:12px 20px">4</td></tr>
+<tr style="background:#f1dcc9"><td style="padding:12px 20px"><b>Total (peso × nota, máximo 85)</b></td><td style="text-align:center;padding:12px 20px"><b>17</b></td><td style="text-align:center;padding:12px 20px"><b>54</b></td><td style="text-align:center;padding:12px 20px"><b>74</b></td><td style="text-align:center;padding:12px 20px"><b>80</b></td></tr>
+</table>
+<p style="font-size:34px;line-height:1.4;color:#21241f;width:1640px">Cambia el escenario —un banco con 150 testers de Java— y <b>cambia el ganador</b>.</p>
+<p style="position:absolute;left:128px;bottom:56px;width:1500px;font-family:'IBM Plex Mono',monospace;font-size:24px;color:#5c6158">Verificación y validación · Tema 3.2 · puntajes de ejemplo (1 a 5), no una verdad</p>
+</section>
+</div>
+<div class="cell" data-slide="vota" data-n="16" tabindex="0" role="group" aria-roledescription="diapositiva" aria-label="16 de 21: ¿Qué herramienta para cada caso?">
+<section style="background:#1d201c;color:#f2efe6;font-family:'Source Serif 4',Georgia,serif;padding:88px 128px 150px;display:flex;flex-direction:column;gap:30px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:#e58444;line-height:1.3">Votación · 4 minutos</p>
+<h2 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:88px;font-weight:700;line-height:1.05;color:#f2efe6">¿Qué herramienta para cada caso?</h2>
+<ol style="font-size:35px;line-height:1.6;color:#f2efe6;padding:0 0 0 52px">
+<li>Comprobar que el IVA se calcula bien con cualquier descuento</li>
+<li>Un banco con 150 personas en pruebas, todas en Java y con una Grid de Selenium</li>
+<li>Una startup de 4 personas con React y pantallas que cambian cada semana</li>
+<li>Los equipos de pedidos y de pagos deben respetar el mismo acuerdo entre servicios</li>
+<li>Una aplicación nativa de Android y de iOS</li>
+<li>Saber si la tienda aguanta 500 compradores a la vez</li>
+</ol>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:30px;font-weight:500;color:#e58444;line-height:1.3">Voten el tipo de prueba y la herramienta</p>
+<p style="position:absolute;left:128px;bottom:56px;width:1400px;font-family:'IBM Plex Mono',monospace;font-size:24px;color:#9a9d8e">Verificación y validación · Tema 3.2</p>
+</section>
+</div>
+<div class="cell" data-slide="banderas" data-n="17" tabindex="0" role="group" aria-roledescription="diapositiva" aria-label="17 de 21: Seis banderas rojas">
+<section style="background:#eae7de;color:#21241f;font-family:'Source Serif 4',Georgia,serif;padding:88px 128px 150px;display:flex;flex-direction:column;gap:32px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:#a84a14;line-height:1.3">Antes de firmar</p>
+<h2 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:88px;font-weight:700;line-height:1.05;color:#21241f">Seis banderas rojas</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px">
+<div style="display:flex;flex-direction:column;gap:10px;background:#fbfaf5;border-top:8px solid #8f2b21;padding:24px 28px 30px">
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:46px;font-weight:700;line-height:1.1;color:#8f2b21">Herramienta primero, problema después</h3>
+<p style="font-size:28px;line-height:1.3;color:#21241f">Se eligió por moda o por una charla.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;background:#fbfaf5;border-top:8px solid #8f2b21;padding:24px 28px 30px">
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:46px;font-weight:700;line-height:1.1;color:#8f2b21">Grabar y reproducir como estrategia</h3>
+<p style="font-size:28px;line-height:1.3;color:#21241f">Lo que graba el codegen es un borrador, no una suite.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;background:#fbfaf5;border-top:8px solid #8f2b21;padding:24px 28px 30px">
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:46px;font-weight:700;line-height:1.1;color:#8f2b21">Nadie es dueño de la suite</h3>
+<p style="font-size:28px;line-height:1.3;color:#21241f">Sin responsable, se pudre en pocas semanas.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;background:#fbfaf5;border-top:8px solid #8f2b21;padding:24px 28px 30px">
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:46px;font-weight:700;line-height:1.1;color:#8f2b21">Una herramienta sin futuro</h3>
+<p style="font-size:28px;line-height:1.3;color:#21241f">Protractor era la oficial de Angular: quedó obsoleta y hubo que migrar.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;background:#fbfaf5;border-top:8px solid #8f2b21;padding:24px 28px 30px">
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:46px;font-weight:700;line-height:1.1;color:#8f2b21">Atarse a un proveedor</h3>
+<p style="font-size:28px;line-height:1.3;color:#21241f">Pruebas que solo corren en su nube o en su formato.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;background:#fbfaf5;border-top:8px solid #8f2b21;padding:24px 28px 30px">
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:46px;font-weight:700;line-height:1.1;color:#8f2b21">Comparar por líneas de código</h3>
+<p style="font-size:28px;line-height:1.3;color:#21241f">Importa lo que cuesta mantener, no lo que cuesta escribir.</p>
+</div>
+</div>
+<p style="font-size:34px;line-height:1.4;color:#21241f;width:1640px">Una bandera roja no prohíbe: <b>obliga a justificar</b>.</p>
+<p style="position:absolute;left:128px;bottom:56px;width:1400px;font-family:'IBM Plex Mono',monospace;font-size:24px;color:#5c6158">Verificación y validación · Tema 3.2</p>
+</section>
+</div>
+<div class="cell" data-slide="mantenimiento" data-n="18" tabindex="0" role="group" aria-roledescription="diapositiva" aria-label="18 de 21: El costo escondido: mantener">
+<section style="background:#fbfaf5;color:#21241f;font-family:'Source Serif 4',Georgia,serif;padding:88px 128px 150px;display:flex;flex-direction:column;gap:32px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:#a84a14;line-height:1.3">Después de la primera semana</p>
+<h2 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:88px;font-weight:700;line-height:1.05;color:#21241f">El costo escondido: mantener</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+<div style="display:flex;flex-direction:column;gap:10px;background:#f1eee4;border:2px solid #dbd7c9;border-radius:12px;padding:26px 32px 32px">
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:56px;font-weight:700;line-height:1.1;color:#a84a14">Versiones</h3>
+<p style="font-size:30px;line-height:1.35;color:#21241f">Su repositorio fija las versiones (package-lock.json) y el CI usa npm ci: todos corren lo mismo.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;background:#f1eee4;border:2px solid #dbd7c9;border-radius:12px;padding:26px 32px 32px">
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:56px;font-weight:700;line-height:1.1;color:#a84a14">Navegadores</h3>
+<p style="font-size:30px;line-height:1.35;color:#21241f">npx playwright install descarga el navegador que esa versión espera: herramienta y navegador se actualizan juntos.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;background:#f1eee4;border:2px solid #dbd7c9;border-radius:12px;padding:26px 32px 32px">
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:56px;font-weight:700;line-height:1.1;color:#a84a14">Inestabilidad</h3>
+<p style="font-size:30px;line-height:1.35;color:#21241f">Una de las pruebas heredadas fallaba a veces: repetirla muchas veces la delató; un reintento la habría escondido.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;background:#f1eee4;border:2px solid #dbd7c9;border-radius:12px;padding:26px 32px 32px">
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:56px;font-weight:700;line-height:1.1;color:#a84a14">Trazabilidad</h3>
+<p style="font-size:30px;line-height:1.35;color:#21241f">test.fail(true, 'PRJ-12 · …') conecta cada prueba con su issue en Jira.</p>
+</div>
+</div>
+<p style="font-size:34px;line-height:1.4;color:#21241f;width:1640px">En 3.1 vimos que mantener pesa más que escribir. Hoy se suma: <b>mantener también la herramienta</b>.</p>
+<p style="position:absolute;left:128px;bottom:56px;width:1400px;font-family:'IBM Plex Mono',monospace;font-size:24px;color:#6b6f63">Verificación y validación · Tema 3.2</p>
+</section>
+</div>
+<div class="cell" data-slide="adr" data-n="19" tabindex="0" role="group" aria-roledescription="diapositiva" aria-label="19 de 21: Decídanlo en una página: el ADR">
+<section style="background:#eae7de;color:#21241f;font-family:'Source Serif 4',Georgia,serif;padding:88px 128px 150px;display:flex;flex-direction:column;gap:30px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:#a84a14;line-height:1.3">Dejarlo por escrito</p>
+<h2 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:88px;font-weight:700;line-height:1.05;color:#21241f">Decídanlo en una página: el ADR</h2>
+<div style="display:flex;gap:36px;align-items:stretch">
+<div style="width:980px;display:flex;flex-direction:column;gap:0;background:#1d201c;border-radius:12px;padding:26px 32px 32px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;letter-spacing:1px;color:#e58444;padding:0 0 14px">docs/adr/0001-herramienta-de-interfaz.md</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#f2efe6;white-space:nowrap">ADR-001 · Herramienta para pruebas de interfaz</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#f2efe6;white-space:nowrap">&#160;</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#f2efe6;white-space:nowrap">Contexto:&#160;&#160;&#160;&#160;&#160;&#160;&#160;equipo de 4, aplicación React, CI en GitHub</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#f2efe6;white-space:nowrap">Opciones:&#160;&#160;&#160;&#160;&#160;&#160;&#160;Selenium · Cypress · Playwright</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#f2efe6;white-space:nowrap">Criterios:&#160;&#160;&#160;&#160;&#160;&#160;encaje, estabilidad, diagnóstico (matriz)</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#e58444;white-space:nowrap">Decisión:&#160;&#160;&#160;&#160;&#160;&#160;&#160;Playwright con TypeScript</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#f2efe6;white-space:nowrap">Consecuencias:&#160;solo Chromium, Firefox y WebKit;</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.5;color:#f2efe6;white-space:nowrap">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;revisar en 6 meses</p>
+</div>
+<div style="width:648px;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:4px;background:#fbfaf5;border-top:8px solid #a84a14;padding:18px 26px 22px">
+<p style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:44px;font-weight:700;line-height:1.1;color:#a84a14">Una página</p>
+<p style="font-size:28px;line-height:1.3;color:#3b3f38">Contexto, opciones, criterios, decisión y consecuencias.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px;background:#fbfaf5;border-top:8px solid #a84a14;padding:18px 26px 22px">
+<p style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:44px;font-weight:700;line-height:1.1;color:#a84a14">Junto al código</p>
+<p style="font-size:28px;line-height:1.3;color:#3b3f38">Va en el repositorio, versionada como todo lo demás.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px;background:#fbfaf5;border-top:8px solid #a84a14;padding:18px 26px 22px">
+<p style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:44px;font-weight:700;line-height:1.1;color:#a84a14">Se revisa</p>
+<p style="font-size:28px;line-height:1.3;color:#3b3f38">Si cambian las condiciones, se reemplaza por otra decisión.</p>
+</div>
+</div>
+</div>
+<p style="font-size:32px;line-height:1.4;color:#3b3f38;width:1640px">Ya hicieron algo parecido: <b>ENTREGA.md, sección 1</b> (qué automatizar y por qué).</p>
+<p style="position:absolute;left:128px;bottom:56px;width:1500px;font-family:'IBM Plex Mono',monospace;font-size:24px;color:#5c6158">Verificación y validación · Tema 3.2 · ADR = registro de decisión de arquitectura (Nygard, 2011)</p>
+</section>
+</div>
+<div class="cell" data-slide="duelo" data-n="20" tabindex="0" role="group" aria-roledescription="diapositiva" aria-label="20 de 21: El duelo de herramientas">
+<section style="background:#fbfaf5;color:#21241f;font-family:'Source Serif 4',Georgia,serif;padding:88px 128px 150px;display:flex;flex-direction:column;gap:26px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:#a84a14;line-height:1.3">La actividad de hoy</p>
+<h2 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:88px;font-weight:700;line-height:1.05;color:#21241f">El duelo de herramientas</h2>
+<p style="font-size:36px;line-height:1.35;color:#3b3f38;width:1660px">Tres herramientas, <b>una misma regla</b>. Prueban una y recomiendan <b>cuál elegir</b> para un cliente.</p>
+<div style="display:flex;align-items:stretch;gap:20px;padding:6px 0 0">
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#f1eee4;border:2px solid #dbd7c9;border-radius:12px;padding:26px 28px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;color:#5c6158">1</p>
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:52px;font-weight:700;line-height:1.1;color:#21241f">Portar</h3>
+<p style="font-size:29px;line-height:1.3;color:#3b3f38">Tres criterios de la tienda, escritos en su herramienta.</p>
+</div>
+<div aria-hidden="true" style="background:#a84a14;width:48px;height:28px;align-self:center;display:block;flex:none;clip-path:polygon(0% 32%, 58% 32%, 58% 0%, 100% 50%, 58% 100%, 58% 68%, 0% 68%)"></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#f1eee4;border:2px solid #dbd7c9;border-radius:12px;padding:26px 28px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;color:#5c6158">2</p>
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:52px;font-weight:700;line-height:1.1;color:#21241f">Medir</h3>
+<p style="font-size:29px;line-height:1.3;color:#3b3f38">Velocidad, estabilidad, código, diagnóstico y vigencia.</p>
+</div>
+<div aria-hidden="true" style="background:#a84a14;width:48px;height:28px;align-self:center;display:block;flex:none;clip-path:polygon(0% 32%, 58% 32%, 58% 0%, 100% 50%, 58% 100%, 58% 68%, 0% 68%)"></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#f1eee4;border:2px solid #dbd7c9;border-radius:12px;padding:26px 28px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;color:#5c6158">3</p>
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:52px;font-weight:700;line-height:1.1;color:#21241f">Comparar</h3>
+<p style="font-size:29px;line-height:1.3;color:#3b3f38">Los datos de toda la clase, en un tablero.</p>
+</div>
+<div aria-hidden="true" style="background:#a84a14;width:48px;height:28px;align-self:center;display:block;flex:none;clip-path:polygon(0% 32%, 58% 32%, 58% 0%, 100% 50%, 58% 100%, 58% 68%, 0% 68%)"></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#c85a1d;border-radius:12px;padding:26px 28px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;color:#fbfaf5">4</p>
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:52px;font-weight:700;line-height:1.1;color:#fbfaf5">Decidir</h3>
+<p style="font-size:29px;line-height:1.3;color:#fbfaf5">Matriz ponderada y un ADR para su cliente.</p>
+</div>
+</div>
+<div style="display:flex;gap:24px;align-items:stretch">
+<div style="flex:1;display:flex;flex-direction:column;gap:6px;background:#fbfaf5;border-top:8px solid #a84a14;border-left:2px solid #dbd7c9;border-right:2px solid #dbd7c9;border-bottom:2px solid #dbd7c9;padding:16px 26px 18px">
+<p style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:44px;font-weight:700;line-height:1.1;color:#a84a14">Dos sorteos</p>
+<p style="font-size:28px;line-height:1.3;color:#3b3f38">Una herramienta (Selenium, Cypress o Playwright con Cucumber) y un cliente, entre seis.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px;background:#fbfaf5;border-top:8px solid #a84a14;border-left:2px solid #dbd7c9;border-right:2px solid #dbd7c9;border-bottom:2px solid #dbd7c9;padding:16px 26px 18px">
+<p style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:44px;font-weight:700;line-height:1.1;color:#a84a14">Equipos de tres</p>
+<p style="font-size:28px;line-height:1.3;color:#3b3f38">2 h 20 min en siete partes. La tienda corre en su equipo.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px;background:#fbfaf5;border-top:8px solid #a84a14;border-left:2px solid #dbd7c9;border-right:2px solid #dbd7c9;border-bottom:2px solid #dbd7c9;padding:16px 26px 18px">
+<p style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:44px;font-weight:700;line-height:1.1;color:#a84a14">Lo que entregan</p>
+<p style="font-size:28px;line-height:1.3;color:#3b3f38">Las mediciones, la matriz y una página: lo que ganan y lo que pierden.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:56px;width:1500px;font-family:'IBM Plex Mono',monospace;font-size:24px;color:#6b6f63">Verificación y validación · Tema 3.2 · las tablas de herramientas son de octubre de 2026</p>
+</section>
+</div>
+<div class="cell" data-slide="cierre" data-n="21" tabindex="0" role="group" aria-roledescription="diapositiva" aria-label="21 de 21: Para llevarse">
+<section style="background:#1d201c;color:#f2efe6;font-family:'Source Serif 4',Georgia,serif;padding:88px 128px 150px;display:flex;flex-direction:column;gap:32px">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:#e58444;line-height:1.3">Cierre</p>
+<h2 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:88px;font-weight:700;line-height:1.05;color:#f2efe6">Para llevarse</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px;background:#262a24;border-top:10px solid #e58444;padding:28px 32px 34px">
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:54px;font-weight:700;line-height:1.1;color:#e58444">La librería la llamas; el framework te llama</h3>
+<p style="font-size:29px;line-height:1.35;color:#f2efe6">Y «framework de automatización» también es la estructura que construyen encima.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#262a24;border-top:10px solid #e58444;padding:28px 32px 34px">
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:54px;font-weight:700;line-height:1.1;color:#e58444">Elegir con criterios</h3>
+<p style="font-size:29px;line-height:1.35;color:#f2efe6">Pesen el proyecto, prueben con algo pequeño y dejen la decisión por escrito.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#262a24;border-top:10px solid #e58444;padding:28px 32px 34px">
+<h3 style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:54px;font-weight:700;line-height:1.1;color:#e58444">Mantener pesa más</h3>
+<p style="font-size:29px;line-height:1.35;color:#f2efe6">Versiones, navegadores e inestabilidad cuestan más que escribir las primeras pruebas.</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;padding:12px 0 0">
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#e58444;line-height:1.4">Referencias</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.4;color:#c9c6ba;white-space:nowrap">ISTQB. Certified Tester Foundation Level v4.0: herramientas de prueba y automatización.</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.4;color:#c9c6ba;white-space:nowrap">ISTQB. Test Automation Engineer (nivel avanzado): arquitectura genérica de automatización (gTAA).</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.4;color:#c9c6ba;white-space:nowrap">Nygard, M. (2011). Documenting Architecture Decisions.</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.4;color:#c9c6ba;white-space:nowrap">Angular Blog. The state of end-to-end testing with Angular (el caso de Protractor).</p>
+<p style="font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.4;color:#c9c6ba;white-space:nowrap">Documentación oficial: playwright.dev · selenium.dev · docs.cypress.io</p>
+</div>
+<p style="position:absolute;left:128px;bottom:56px;width:1400px;font-family:'IBM Plex Mono',monospace;font-size:24px;color:#9a9d8e">Verificación y validación · Tema 3.2</p>
+</section>
+</div>
+</main>
+
+<div id="ui-progress" aria-hidden="true"><i></i></div>
+<div id="ui-hint" aria-hidden="true">Todas las diapositivas · clic para abrir una · Esc para volver</div>
+<div id="ui-rotate" aria-hidden="true">Gira el teléfono para ver las diapositivas más grandes</div>
+<nav id="ui-bar" aria-label="Controles de la presentación">
+  <a href="/guia.html" title="Guía del laboratorio">Guía</a>
+  <span class="sep only-present" aria-hidden="true"></span>
+  <button type="button" id="ui-prev" class="only-present" aria-label="Diapositiva anterior" title="Anterior (←)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <span id="ui-count" class="only-present" aria-live="polite">1 / 21</span>
+  <button type="button" id="ui-next" class="only-present" aria-label="Diapositiva siguiente" title="Siguiente (→)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  <span class="sep" aria-hidden="true"></span>
+  <button type="button" id="ui-grid" aria-label="Ver todas las diapositivas" aria-pressed="false" title="Ver todas (O)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg></button>
+  <button type="button" id="ui-full" aria-label="Pantalla completa" title="Pantalla completa (F)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+  <button type="button" id="ui-print" aria-label="Imprimir o guardar como PDF" title="Imprimir o guardar como PDF"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6M7 17H5a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2"/><rect x="7" y="14" width="10" height="7" rx="1"/></svg></button>
+</nav>
+
+<script>
+(() => {
+  const ids = ["cover","hilo","pregunta","libreria-framework","dos-significados","ya-armaron","anatomia","piramide-herramientas","ui-filosofias","misma-prueba","mas-alla","estilos","bdd","criterios","matriz","vota","banderas","mantenimiento","adr","duelo","cierre"];
+  const body = document.body;
+  const root = document.documentElement;
+  const cells = [...document.querySelectorAll('.cell')];
+  const total = cells.length;
+  const bar = document.getElementById('ui-bar');
+  const count = document.getElementById('ui-count');
+  const prevBtn = document.getElementById('ui-prev');
+  const nextBtn = document.getElementById('ui-next');
+  const gridBtn = document.getElementById('ui-grid');
+  const fullBtn = document.getElementById('ui-full');
+  const printBtn = document.getElementById('ui-print');
+  const progress = document.querySelector('#ui-progress i');
+  const isGrid = () => body.classList.contains('grid');
+  let cur = 0;
+  let idleTimer = 0;
+
+  function fit() {
+    if (isGrid()) {
+      const vw = root.clientWidth, pad = 24, gap = 24, target = 380;
+      const cols = Math.max(1, Math.floor((vw - pad * 2 + gap) / (target + gap)));
+      const w = Math.min(560, (vw - pad * 2 - gap * (cols - 1)) / cols);
+      root.style.setProperty('--cols', cols);
+      root.style.setProperty('--k', (w / 1920).toFixed(5));
+    } else {
+      root.style.setProperty('--k', Math.min(window.innerWidth / 1920, window.innerHeight / 1080).toFixed(5));
+    }
+  }
+
+  function render() {
+    cells.forEach((c, i) => {
+      c.classList.toggle('active', i === cur);
+      c.inert = !isGrid() && i !== cur;
+    });
+    count.textContent = (cur + 1) + ' / ' + total;
+    prevBtn.disabled = cur === 0;
+    nextBtn.disabled = cur === total - 1;
+    progress.style.width = ((cur + 1) / total * 100) + '%';
+  }
+
+  function go(n, noHash) {
+    cur = Math.max(0, Math.min(total - 1, n));
+    render();
+    if (!noHash) history.replaceState(null, '', '#' + ids[cur]);
+  }
+
+  function fromHash() {
+    const h = decodeURIComponent(location.hash.slice(1));
+    if (!h) return 0;
+    const byId = ids.indexOf(h);
+    if (byId >= 0) return byId;
+    const n = parseInt(h, 10);
+    return Number.isFinite(n) ? n - 1 : 0;
+  }
+
+  function setGrid(on) {
+    body.classList.toggle('grid', on);
+    body.classList.toggle('present', !on);
+    gridBtn.setAttribute('aria-pressed', String(on));
+    body.classList.remove('idle');
+    fit();
+    render();
+    if (on) cells[cur].scrollIntoView({ block: 'center' });
+    else window.scrollTo(0, 0);
+  }
+
+  function toggleFull() {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else root.requestFullscreen().catch(() => {});
+  }
+  if (!root.requestFullscreen) fullBtn.hidden = true;
+
+  function wake() {
+    body.classList.remove('idle');
+    clearTimeout(idleTimer);
+    if (isGrid() || !matchMedia('(hover: hover)').matches) return;
+    idleTimer = setTimeout(() => {
+      if (!bar.matches(':focus-within')) body.classList.add('idle');
+    }, 2600);
+  }
+
+  prevBtn.addEventListener('click', () => go(cur - 1));
+  nextBtn.addEventListener('click', () => go(cur + 1));
+  gridBtn.addEventListener('click', () => setGrid(!isGrid()));
+  fullBtn.addEventListener('click', toggleFull);
+  printBtn.addEventListener('click', () => window.print());
+
+  cells.forEach((c, i) => {
+    c.addEventListener('click', (e) => {
+      if (isGrid()) { go(i); setGrid(false); return; }
+      if (e.target.closest('a')) return;
+      if (String(getSelection()).length) return;
+      const x = e.clientX / window.innerWidth;
+      go(x < 0.3 ? cur - 1 : cur + 1);
+    });
+    c.addEventListener('keydown', (e) => {
+      if (isGrid() && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); go(i); setGrid(false); }
+    });
+  });
+
+  addEventListener('keydown', (e) => {
+    wake();
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const onControl = e.target.closest && e.target.closest('button, a');
+    const k = e.key;
+    if (isGrid()) {
+      const cols = parseInt(getComputedStyle(root).getPropertyValue('--cols'), 10) || 1;
+      const move = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: cols, ArrowUp: -cols }[k];
+      if (move) { e.preventDefault(); go(cur + move, true); cells[cur].focus(); cells[cur].scrollIntoView({ block: 'nearest' }); return; }
+      if (k === 'Escape' || k === 'o' || k === 'O' || k === 'g' || k === 'G') { e.preventDefault(); setGrid(false); }
+      return;
+    }
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || ((k === ' ' || k === 'Enter') && !onControl)) {
+      e.preventDefault(); go(cur + (e.shiftKey && k === ' ' ? -1 : 1));
+    } else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp' || k === 'Backspace') {
+      e.preventDefault(); go(cur - 1);
+    } else if (k === 'Home') { e.preventDefault(); go(0); }
+    else if (k === 'End') { e.preventDefault(); go(total - 1); }
+    else if (k === 'f' || k === 'F') toggleFull();
+    else if (k === 'o' || k === 'O' || k === 'g' || k === 'G') setGrid(true);
+  });
+
+  let tx = 0, ty = 0;
+  const vp = document.getElementById('viewport');
+  vp.addEventListener('touchstart', (e) => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+  vp.addEventListener('touchend', (e) => {
+    if (isGrid()) return;
+    const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) go(cur + (dx < 0 ? 1 : -1));
+  }, { passive: true });
+
+  addEventListener('resize', fit);
+  addEventListener('pointermove', wake);
+  addEventListener('pointerdown', wake);
+  addEventListener('hashchange', () => go(fromHash(), true));
+
+  fit();
+  go(fromHash(), true);
+  wake();
+})();
+</script>
+</body>
+</html>

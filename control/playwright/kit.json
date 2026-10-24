@@ -1,0 +1,17 @@
+{
+  "herramienta": "playwright",
+  "nombre": "Playwright Test (control)",
+  "pruebasEsperadas": 3,
+  "resultado": "(\\d+) passed",
+  "pruebas": [
+    "tests/**/*.js"
+  ],
+  "soporte": [
+    "playwright.config.js"
+  ],
+  "paquetes": [
+    "@playwright/test"
+  ],
+  "salida": "medidas-control.json",
+  "autoinforme": false
+}

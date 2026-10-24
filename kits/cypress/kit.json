@@ -1,0 +1,10 @@
+{
+  "herramienta": "cypress",
+  "nombre": "Cypress",
+  "pruebasEsperadas": 3,
+  "resultado": "Passing:\\s+(\\d+)",
+  "pruebas": ["cypress/e2e/**/*.js"],
+  "soporte": ["cypress.config.js", "cypress/support/**/*.js"],
+  "paquetes": ["cypress"],
+  "salida": "medidas.json"
+}

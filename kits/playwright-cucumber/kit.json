@@ -1,0 +1,10 @@
+{
+  "herramienta": "playwright-cucumber",
+  "nombre": "Playwright + Cucumber (BDD)",
+  "pruebasEsperadas": 3,
+  "resultado": "scenarios? \\([^)]*?(\\d+) passed",
+  "pruebas": ["features/**/*.feature", "features/pasos/**/*.js"],
+  "soporte": ["features/soporte/**/*.js", "cucumber.js"],
+  "paquetes": ["@cucumber/cucumber", "@playwright/test"],
+  "salida": "medidas.json"
+}

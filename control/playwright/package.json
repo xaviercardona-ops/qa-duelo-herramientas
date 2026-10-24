@@ -1,0 +1,16 @@
+{
+  "name": "duelo-control-playwright",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Control del duelo: los tres criterios ya escritos en Playwright, para medir con la misma regla",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node ../../herramientas/con-tienda.mjs playwright test",
+    "medir": "node ../../herramientas/medir.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.0"
+  }
+}

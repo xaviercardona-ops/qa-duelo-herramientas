@@ -1,0 +1,17 @@
+{
+  "name": "duelo-kit-playwright-cucumber",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Kit del duelo: Playwright + Cucumber (BDD con Gherkin en español)",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node ../../herramientas/con-tienda.mjs cucumber-js",
+    "medir": "node ../../herramientas/medir.mjs"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "^13.0.0",
+    "@playwright/test": "^1.64.0"
+  }
+}

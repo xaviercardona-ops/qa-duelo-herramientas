@@ -1,0 +1,21 @@
+node_modules/
+.DS_Store
+*.log
+.env
+.vscode/
+
+# Resultados de ejecución (cada herramienta deja los suyos)
+test-results/
+playwright-report/
+**/cypress/screenshots/
+**/cypress/videos/
+**/cypress/downloads/
+informe/
+reports/
+capturas/
+
+# Material del docente: no se publica
+GUIA_DOCENTE.md
+solucion/
+.vercel
+.env*
